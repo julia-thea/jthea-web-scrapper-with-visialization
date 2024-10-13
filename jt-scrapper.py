@@ -1,23 +1,26 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd 
 
-# URL of the page to scrape
 url = 'https://www.bbc.com/news'
 
-# Send a request to fetch the content of the webpage
 response = requests.get(url)
 
-# Check if the request was successful (status code 200)
+
 if response.status_code == 200:
-    # Parse the content with BeautifulSoup
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Find all headlines in <h2> tags (Modify the tag based on the website structure)
     headlines = soup.find_all('h2')
+    data = []
 
-    # Print each headline
     print("Latest News Headlines:")
+
     for headline in headlines:
-        print(headline.get_text())
+        text = headline.get_text().strip()  # Get the text and strip any extra whitespace
+        data.append({'headline': text})     # Store each headline as a dictionary
+
+    # Convert the list of dictionaries into a pandas DataFrame
+    df = pd.DataFrame(data)
+    print(df)
 else:
     print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
