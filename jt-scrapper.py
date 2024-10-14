@@ -1,23 +1,41 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# URL of the page to scrape
 url = 'https://www.bbc.com/news'
 
-# Send a request to fetch the content of the webpage
 response = requests.get(url)
 
-# Check if the request was successful (status code 200)
+
 if response.status_code == 200:
-    # Parse the content with BeautifulSoup
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Find all headlines in <h2> tags (Modify the tag based on the website structure)
     headlines = soup.find_all('h2')
+    data = []
 
-    # Print each headline
     print("Latest News Headlines:")
+
     for headline in headlines:
-        print(headline.get_text())
+        text = headline.get_text().strip()
+        data.append({'headline': text})
+
+    # Convert the list of dictionaries into a pandas DataFrame
+    df = pd.DataFrame(data)
+    
+    # Visualizing the data
+    # Count the occurrences of keywords in headlines
+    keywords = ['Elon Musk', 'election', 'Russia', 'climate', 'health']
+    counts = {keyword: df['headline'].str.contains(keyword, case=False, na=False).sum() for keyword in keywords}
+
+    # Create a bar chart
+    plt.figure(figsize=(10, 6))
+    plt.bar(counts.keys(), counts.values(), color='skyblue')
+    plt.title('Frequency of Keywords in News Headlines')
+    plt.xlabel('Keywords')
+    plt.ylabel('Number of Occurrences')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
 else:
     print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
